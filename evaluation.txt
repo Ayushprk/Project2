@@ -1,0 +1,22 @@
+Teammate A Responsibilities
+• Code Implementation
+1. struct TrieNode definition
+• Create the trie node structure with count and 26 child pointers.
+2. addWordOccurrence(struct TrieNode* root, const char* word)
+• Traverse the trie and insert/update word count.
+3. main(int argo, char* argv[])
+• Basic setup, call indexPage, printTrieContents, and freeTrieMemory.
+• Testing
+• Compile with -Wall, run simple tests locally.
+• Assist in using valgrind for checking memory leaks.Teammate B Responsibilities
+Code Implementation
+1. printTrieContents (struct TrieNode* root, char* buffer, int level)
+• Recursively print all words with non-zero counts in alphabetical order.
+2. freeTrieMemory(struct TrieNode* root)
+• Recursively deallocate memory to avoid leaks.
+3. indexPage (const char* url)
+• Use getText to extract text from a page, parse words, and add them to the trie using addWordOccurrence •
+• Testing
+• Run runTestCases.sh
+on the Diamond server.
+• Compare output with provided solution.
