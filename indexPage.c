@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>  // For isalpha and tolower
+#include <ctype.h>  
 
 /* TODO: structure definitions */
 
