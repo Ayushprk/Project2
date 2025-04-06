@@ -9,29 +9,44 @@
 #include <string.h>
 #include <ctype.h>  // For isalpha and tolower
 
+/* TODO: structure definitions */
+
 #define ALPHABET_SIZE 26
 #define BUFFER_SIZE 300001
 #define MAX_WORD_LEN 256
 
+// Each trie node holds a word count and pointers to child nodes for each alphabet letter
 typedef struct TrieNode {
   int count;
   struct TrieNode* children[ALPHABET_SIZE];
 } TrieNode;
 
+/* NOTE: int return values can be used to indicate errors (typically non-zero)
+   or success (typically zero return value) */
+
+/* TODO: change this return type */
 int indexPage(const char* url, TrieNode* root);
+
 int addWordOccurrence(const char* word, const int wordLength, TrieNode* root);
+
 void printTrieContents(TrieNode* root);
-int freeTrieMemory(TrieNode* node);
+
+int freeTrieMemory(TrieNode* root);
+
 int getText(const char* srcAddr, char* buffer, const int bufSize);
 
 int main(int argc, char** argv){
-  // TODO: Handle command-line argument
+  /* TODO: write the (simple) main function
+
+  /* argv[1] will be the URL to index, if argc > 1 */
+
+  // Check for command-line input
   if (argc < 2) {
     fprintf(stderr, "Usage: %s <URL>\n", argv[0]);
     return 1;
   }
 
-  // TODO: Allocate root node
+  // Create and initialize the root of the trie
   TrieNode* root = malloc(sizeof(TrieNode));
   if (!root) {
     fprintf(stderr, "ERROR: Memory allocation failed\n");
@@ -43,25 +58,28 @@ int main(int argc, char** argv){
     root->children[i] = NULL;
   }
 
-  // TODO: Call indexPage
+  // Index the webpage content
   if (indexPage(argv[1], root) != 0) {
     fprintf(stderr, "ERROR: Failed to index page.\n");
     freeTrieMemory(root);
     return 1;
   }
 
-  // TODO: Print trie contents
+  // Display word counts
   printTrieContents(root);
 
-  // TODO: Free trie memory
+  // Clean up dynamically allocated memory
   freeTrieMemory(root);
 
   return 0;
 }
 
+/* TODO: define the functions corresponding to the above prototypes */
+
+/* TODO: change this return type */
 int indexPage(const char* url, TrieNode* root)
 {
-  // TODO: Retrieve content from URL using getText
+  // Fetch webpage text into buffer
   char buffer[BUFFER_SIZE];
   int bytesRead = getText(url, buffer, sizeof(buffer));
 
@@ -70,23 +88,27 @@ int indexPage(const char* url, TrieNode* root)
     return 1;
   }
 
+  // Print the URL before parsing
   printf("%s\n", url);
 
   int i = 0;
   while (buffer[i] != '\0') {
+    // Skip non-letter characters
     while (buffer[i] && !isalpha(buffer[i])) i++;
 
     char word[MAX_WORD_LEN];
     int len = 0;
 
+    // Build a lowercase word from consecutive letters
     while (buffer[i] && isalpha(buffer[i]) && len < MAX_WORD_LEN - 1) {
       word[len++] = tolower(buffer[i++]);
     }
 
+    // If a word was built, insert it into the trie
     if (len > 0) {
       word[len] = '\0';
       addWordOccurrence(word, len, root);
-      printf("\t%s\n", word);
+      printf("\t%s\n", word);  // Print the word with tab indentation
     }
   }
 
@@ -95,12 +117,13 @@ int indexPage(const char* url, TrieNode* root)
 
 int addWordOccurrence(const char* word, const int wordLength, TrieNode* root)
 {
-  // TODO: Add a word occurrence to the trie
+  // Traverse the trie to insert the word
   TrieNode* current = root;
   for (int i = 0; i < wordLength; i++) {
     int idx = word[i] - 'a';
     if (idx < 0 || idx >= ALPHABET_SIZE) continue;
 
+    // Allocate new node if missing
     if (current->children[idx] == NULL) {
       current->children[idx] = malloc(sizeof(TrieNode));
       if (!current->children[idx]) return 1;
@@ -114,6 +137,7 @@ int addWordOccurrence(const char* word, const int wordLength, TrieNode* root)
     current = current->children[idx];
   }
 
+  // Increment count at the last node
   current->count++;
   return 0;
 }
@@ -122,9 +146,10 @@ void printTrieContentsHelper(TrieNode* node, char* buffer, int depth)
 {
   if (node->count > 0) {
     buffer[depth] = '\0';
-    printf("%s: %d\n", buffer, node->count);
+    printf("%s: %d\n", buffer, node->count);  // Print word and count
   }
 
+  // Recursively check all children
   for (int i = 0; i < ALPHABET_SIZE; i++) {
     if (node->children[i]) {
       buffer[depth] = 'a' + i;
@@ -135,26 +160,27 @@ void printTrieContentsHelper(TrieNode* node, char* buffer, int depth)
 
 void printTrieContents(TrieNode* root)
 {
-  // TODO: Set up buffer and call recursive helper
   char buffer[MAX_WORD_LEN];
-  printTrieContentsHelper(root, buffer, 0);
+  printTrieContentsHelper(root, buffer, 0);  // Begin recursive print
 }
 
-int freeTrieMemory(TrieNode* node)
+int freeTrieMemory(TrieNode* root)
 {
-  // TODO: Recursively free all trie nodes
-  if (!node) return 0;
+  if (!root) return 0;
 
+  // Recursively free all child nodes
   for (int i = 0; i < ALPHABET_SIZE; i++) {
-    if (node->children[i]) {
-      freeTrieMemory(node->children[i]);
+    if (root->children[i]) {
+      freeTrieMemory(root->children[i]);
     }
   }
 
-  free(node);
+  // Free the current node
+  free(root);
   return 0;
 }
 
+/* You should not need to modify this function */
 int getText(const char* srcAddr, char* buffer, const int bufSize){
   FILE *pipe;
   int bytesRead;
@@ -163,7 +189,8 @@ int getText(const char* srcAddr, char* buffer, const int bufSize){
 
   pipe = popen(buffer, "r");
   if(pipe == NULL){
-    fprintf(stderr, "ERROR: could not open the pipe for command %s\n", buffer);
+    fprintf(stderr, "ERROR: could not open the pipe for command %s\n",
+	    buffer);
     return 0;
   }
 
